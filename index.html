@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0A0A0F">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="JPM Tracker">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <title>JPM Tracker — Career Path</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { background: #0A0A0F; color: #F0F0F0; min-height: 100vh; overscroll-behavior: none; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      padding-bottom: 80px;
+    }
+
+    /* ═══════ TOP BAR ═══════ */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 16px 20px 12px;
+    }
+    .topbar-row {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .logo {
+      font-family: 'Fraunces', serif; font-weight: 900; font-size: 18px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #fff 30%, #A78BFA);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .week-pill {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: #A78BFA;
+      background: rgba(167, 139, 250, 0.1);
+      border: 1px solid rgba(167, 139, 250, 0.2);
+      padding: 4px 10px; border-radius: 20px;
+    }
+    .date-line {
+      font-size: 11px; color: rgba(255,255,255,0.4);
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 4px;
+    }
+
+    /* ═══════ TABS ═══════ */
+    .tabs {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(10, 10, 15, 0.95);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex; justify-content: space-around; align-items: center;
+      padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+    }
+    .tab {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      padding: 8px 4px; cursor: pointer; transition: all 0.2s;
+      color: rgba(255,255,255,0.35);
+    }
+    .tab.active { color: #A78BFA; }
+    .tab-icon { font-size: 20px; margin-bottom: 2px; }
+    .tab-label {
+      font-size: 9px; font-weight: 600; letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* ═══════ MAIN CONTENT ═══════ */
+    main { padding: 16px; max-width: 600px; margin: 0 auto; }
+    .view { display: none; }
+    .view.active { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══════ HERO XP CARD ═══════ */
+    .hero-card {
+      background: linear-gradient(135deg, rgba(167, 139, 250, 0.08), rgba(34, 211, 238, 0.04));
+      border: 1px solid rgba(167, 139, 250, 0.15);
+      border-radius: 20px; padding: 20px; margin-bottom: 16px;
+      position: relative; overflow: hidden;
+    }
+    .hero-card::before {
+      content: ''; position: absolute; top: -50%; right: -30%;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(167, 139, 250, 0.15), transparent 70%);
+    }
+    .hero-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(255,255,255,0.5); margin-bottom: 8px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .hero-xp {
+      font-family: 'Fraunces', serif; font-weight: 900;
+      font-size: 48px; line-height: 1; color: #fff;
+      letter-spacing: -2px;
+    }
+    .hero-xp .xp-unit { font-size: 18px; color: rgba(255,255,255,0.4); margin-left: 4px; font-weight: 400; }
+    .hero-subline {
+      font-size: 12px; color: rgba(255,255,255,0.5);
+      margin-top: 6px; font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ═══════ JPM COMPARISON ═══════ */
+    .jpm-compare {
+      margin-top: 16px; padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .compare-header {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 11px; font-weight: 600; margin-bottom: 10px;
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .compare-header .vs-label { color: rgba(255,255,255,0.4); }
+    .compare-rows { display: flex; flex-direction: column; gap: 8px; }
+    .compare-row {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .compare-row .who {
+      font-size: 11px; font-weight: 600; width: 60px; flex-shrink: 0;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .compare-row .bar {
+      flex: 1; height: 8px; background: rgba(255,255,255,0.06);
+      border-radius: 4px; overflow: hidden; position: relative;
+    }
+    .compare-row .fill {
+      height: 100%; border-radius: 4px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .fill.you { background: linear-gradient(90deg, #A78BFA, #22D3EE); }
+    .fill.jpm { background: linear-gradient(90deg, #FB923C, #F472B6); }
+    .compare-row .val {
+      font-size: 11px; font-weight: 700; min-width: 50px; text-align: right;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .val.you { color: #A78BFA; }
+    .val.jpm { color: #FB923C; }
+    .compare-status {
+      margin-top: 12px; padding: 10px 14px; border-radius: 12px;
+      font-size: 12px; line-height: 1.5;
+    }
+    .compare-status.ahead {
+      background: rgba(52, 211, 153, 0.08);
+      border: 1px solid rgba(52, 211, 153, 0.2);
+      color: #34D399;
+    }
+    .compare-status.behind {
+      background: rgba(251, 113, 133, 0.08);
+      border: 1px solid rgba(251, 113, 133, 0.2);
+      color: #FB7185;
+    }
+    .compare-status.on-track {
+      background: rgba(167, 139, 250, 0.08);
+      border: 1px solid rgba(167, 139, 250, 0.2);
+      color: #A78BFA;
+    }
+
+    /* ═══════ STAT GRID ═══════ */
+    .stat-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 14px; padding: 14px;
+    }
+    .stat-icon { font-size: 18px; margin-bottom: 6px; }
+    .stat-label {
+      font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: rgba(255,255,255,0.4);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .stat-value {
+      font-family: 'Fraunces', serif; font-weight: 700;
+      font-size: 24px; color: #fff; margin-top: 4px; letter-spacing: -1px;
+    }
+    .stat-sub {
+      font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ═══════ SECTION ═══════ */
+    .section { margin-bottom: 20px; }
+    .section-title {
+      font-family: 'Fraunces', serif; font-weight: 600;
+      font-size: 16px; margin-bottom: 10px; color: rgba(255,255,255,0.9);
+      letter-spacing: -0.3px;
+    }
+
+    /* ═══════ TASKS ═══════ */
+    .task-card {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 14px; padding: 14px; margin-bottom: 8px;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .task-card:active { transform: scale(0.98); }
+    .task-card.done {
+      opacity: 0.5; background: rgba(255,255,255,0.01);
+    }
+    .task-checkbox {
+      width: 22px; height: 22px; border-radius: 6px;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      margin-top: 1px;
+    }
+    .task-card.done .task-checkbox {
+      background: #A78BFA; border-color: #A78BFA;
+      color: #fff; font-weight: bold;
+    }
+    .task-content { flex: 1; }
+    .task-cat {
+      display: inline-block;
+      font-size: 9px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; padding: 2px 8px; border-radius: 4px;
+      margin-bottom: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .task-text {
+      font-size: 13px; line-height: 1.5; color: rgba(255,255,255,0.85);
+    }
+    .task-card.done .task-text { text-decoration: line-through; color: rgba(255,255,255,0.4); }
+    .task-xp {
+      font-size: 10px; font-weight: 700; color: #A78BFA;
+      margin-top: 4px; font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ═══════ DEADLINES ═══════ */
+    .deadline-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px; padding: 12px 14px; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .deadline-icon { font-size: 20px; }
+    .deadline-content { flex: 1; }
+    .deadline-label { font-size: 13px; font-weight: 500; }
+    .deadline-date {
+      font-size: 11px; color: rgba(255,255,255,0.4);
+      font-family: 'JetBrains Mono', monospace; margin-top: 2px;
+    }
+    .deadline-days {
+      font-family: 'JetBrains Mono', monospace; font-weight: 700;
+      font-size: 14px; color: #FB923C;
+    }
+    .deadline-days.urgent { color: #FB7185; }
+    .deadline-days.far { color: rgba(255,255,255,0.4); }
+
+    /* ═══════ WEEK NAV ═══════ */
+    .week-nav {
+      display: flex; gap: 6px; overflow-x: auto;
+      padding: 0 0 12px; margin: 0 -16px 0; padding: 0 16px 12px;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    }
+    .week-nav::-webkit-scrollbar { display: none; }
+    .week-nav-btn {
+      flex-shrink: 0; padding: 6px 12px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px; cursor: pointer;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+      color: rgba(255,255,255,0.5); transition: all 0.2s;
+      min-width: 38px; text-align: center;
+    }
+    .week-nav-btn.current {
+      background: #A78BFA; color: #fff; border-color: #A78BFA;
+    }
+    .week-nav-btn.has-tasks { color: rgba(255,255,255,0.8); }
+    .week-nav-btn.completed {
+      background: rgba(52, 211, 153, 0.1); border-color: rgba(52, 211, 153, 0.3);
+      color: #34D399;
+    }
+    .week-header-info {
+      padding: 0 0 12px;
+    }
+    .week-focus {
+      font-family: 'Fraunces', serif; font-weight: 600;
+      font-size: 18px; color: rgba(255,255,255,0.95);
+      letter-spacing: -0.3px;
+    }
+    .week-meta {
+      font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ═══════ JOURNAL & MOOD ═══════ */
+    .mood-selector {
+      display: flex; gap: 8px; margin-bottom: 12px;
+    }
+    .mood-btn {
+      flex: 1; padding: 12px 0; border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      font-size: 24px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mood-btn.selected {
+      background: rgba(167, 139, 250, 0.15);
+      border-color: rgba(167, 139, 250, 0.4);
+      transform: scale(1.05);
+    }
+    .energy-slider {
+      width: 100%; height: 6px; border-radius: 3px;
+      background: rgba(255,255,255,0.06);
+      -webkit-appearance: none; appearance: none;
+      margin: 12px 0;
+    }
+    .energy-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: linear-gradient(135deg, #A78BFA, #22D3EE);
+      cursor: pointer;
+    }
+    .journal-textarea {
+      width: 100%; min-height: 120px; padding: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      color: #fff; font-family: 'Inter', sans-serif;
+      font-size: 13px; line-height: 1.5;
+      resize: vertical;
+    }
+    .journal-textarea:focus {
+      outline: none; border-color: rgba(167, 139, 250, 0.4);
+      background: rgba(255,255,255,0.05);
+    }
+    .save-btn {
+      width: 100%; padding: 14px; margin-top: 10px;
+      background: linear-gradient(135deg, #A78BFA, #22D3EE);
+      border: none; border-radius: 12px;
+      color: #fff; font-weight: 700; font-size: 13px;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .save-btn:active { transform: scale(0.98); }
+
+    /* ═══════ STREAK ═══════ */
+    .streak-display {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(251, 146, 60, 0.08), rgba(251, 113, 133, 0.04));
+      border: 1px solid rgba(251, 146, 60, 0.2);
+      border-radius: 16px; margin-bottom: 16px;
+    }
+    .streak-icon { font-size: 40px; }
+    .streak-content { flex: 1; }
+    .streak-value {
+      font-family: 'Fraunces', serif; font-weight: 900;
+      font-size: 32px; line-height: 1; color: #FB923C;
+      letter-spacing: -1px;
+    }
+    .streak-label {
+      font-size: 11px; color: rgba(255,255,255,0.5);
+      letter-spacing: 0.5px; text-transform: uppercase; margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ═══════ NETWORK ═══════ */
+    .network-add {
+      width: 100%; padding: 14px; margin-bottom: 12px;
+      background: rgba(167, 139, 250, 0.08);
+      border: 1px dashed rgba(167, 139, 250, 0.3);
+      border-radius: 12px;
+      color: #A78BFA; font-weight: 600; font-size: 13px;
+      cursor: pointer;
+    }
+    .contact-card {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px; padding: 12px; margin-bottom: 8px;
+    }
+    .contact-name {
+      font-weight: 600; font-size: 13px; margin-bottom: 2px;
+    }
+    .contact-info {
+      font-size: 11px; color: rgba(255,255,255,0.5);
+    }
+    .contact-status {
+      display: inline-block; font-size: 9px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 4px; margin-top: 6px;
+      background: rgba(167, 139, 250, 0.15); color: #A78BFA;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ═══════ GPA ═══════ */
+    .gpa-input-group {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px; padding: 14px; margin-bottom: 10px;
+    }
+    .gpa-course-name {
+      font-weight: 600; font-size: 13px; margin-bottom: 8px;
+    }
+    .gpa-input {
+      width: 100%; padding: 10px 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      color: #fff; font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+    }
+    .gpa-display {
+      background: linear-gradient(135deg, rgba(252, 211, 77, 0.08), rgba(251, 191, 36, 0.04));
+      border: 1px solid rgba(252, 211, 77, 0.2);
+      border-radius: 16px; padding: 18px; margin-bottom: 12px;
+      text-align: center;
+    }
+    .gpa-value {
+      font-family: 'Fraunces', serif; font-weight: 900;
+      font-size: 48px; color: #FCD34D; letter-spacing: -2px;
+    }
+    .gpa-label {
+      font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: rgba(255,255,255,0.5); margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .gpa-target {
+      font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 6px;
+    }
+
+    /* ═══════ EMPTY STATE ═══════ */
+    .empty-state {
+      text-align: center; padding: 40px 20px;
+      color: rgba(255,255,255,0.4);
+    }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.3; }
+    .empty-state .text { font-size: 13px; line-height: 1.5; }
+
+    /* ═══════ MODAL ═══════ */
+    .modal-bg {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      display: none; align-items: flex-end; justify-content: center;
+    }
+    .modal-bg.show { display: flex; }
+    .modal {
+      width: 100%; max-width: 600px;
+      background: #14141A;
+      border-top-left-radius: 24px; border-top-right-radius: 24px;
+      padding: 20px;
+      animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      max-height: 80vh; overflow-y: auto;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .modal-title {
+      font-family: 'Fraunces', serif; font-weight: 600;
+      font-size: 20px; margin-bottom: 16px;
+    }
+    .modal-input, .modal-select {
+      width: 100%; padding: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      color: #fff; font-family: 'Inter', sans-serif;
+      font-size: 14px; margin-bottom: 10px;
+    }
+    .modal-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .modal-btn {
+      flex: 1; padding: 12px; border-radius: 10px;
+      font-weight: 600; font-size: 13px; cursor: pointer;
+      border: none;
+    }
+    .modal-btn.primary {
+      background: linear-gradient(135deg, #A78BFA, #22D3EE); color: #fff;
+    }
+    .modal-btn.secondary {
+      background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7);
+    }
+  </style>
+</head>
+<body>
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-row">
+      <div class="logo">JPM TRACKER</div>
+      <div class="week-pill" id="topWeekPill">SEMAINE 1</div>
+    </div>
+    <div class="date-line" id="topDateLine">—</div>
+  </div>
+
+  <!-- MAIN -->
+  <main>
+    <!-- ═══ DASHBOARD ═══ -->
+    <div class="view active" id="view-dashboard">
+      <div class="hero-card">
+        <div class="hero-label">Ton XP cumulé</div>
+        <div class="hero-xp">
+          <span id="userXP">0</span><span class="xp-unit">XP</span>
+        </div>
+        <div class="hero-subline" id="xpProgress">0% du parcours complété</div>
+
+        <div class="jpm-compare">
+          <div class="compare-header">
+            <span>vs. Stagiaire JPM moyen</span>
+            <span class="vs-label" id="vsLabel">—</span>
+          </div>
+          <div class="compare-rows">
+            <div class="compare-row">
+              <div class="who">TOI</div>
+              <div class="bar"><div class="fill you" id="userBar" style="width: 0%"></div></div>
+              <div class="val you" id="userBarVal">0</div>
+            </div>
+            <div class="compare-row">
+              <div class="who">JPM</div>
+              <div class="bar"><div class="fill jpm" id="jpmBar" style="width: 0%"></div></div>
+              <div class="val jpm" id="jpmBarVal">0</div>
+            </div>
+          </div>
+          <div class="compare-status on-track" id="compareStatus">
+            Démarrage du parcours. Continue !
+          </div>
+        </div>
+      </div>
+
+      <div class="streak-display">
+        <div class="streak-icon">🔥</div>
+        <div class="streak-content">
+          <div class="streak-value" id="streakValue">0</div>
+          <div class="streak-label">Jours consécutifs</div>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-label">Tâches</div>
+          <div class="stat-value" id="tasksCompleted">0</div>
+          <div class="stat-sub">sur <span id="totalTasks">0</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-label">Semaine</div>
+          <div class="stat-value" id="currentWeekDisp">1</div>
+          <div class="stat-sub">/ 52</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🤝</div>
+          <div class="stat-label">Contacts</div>
+          <div class="stat-value" id="contactsCount">0</div>
+          <div class="stat-sub">réseau</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎓</div>
+          <div class="stat-label">GPA</div>
+          <div class="stat-value" id="gpaCurrent">—</div>
+          <div class="stat-sub">prévisionnel</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">📅 Prochaines échéances</div>
+        <div id="deadlinesList"></div>
+      </div>
+    </div>
+
+    <!-- ═══ TÂCHES ═══ -->
+    <div class="view" id="view-tasks">
+      <div class="week-nav" id="weekNav"></div>
+      <div class="week-header-info" id="weekHeaderInfo"></div>
+      <div id="tasksList"></div>
+    </div>
+
+    <!-- ═══ JOURNAL ═══ -->
+    <div class="view" id="view-journal">
+      <div class="section">
+        <div class="section-title">Comment tu te sens aujourd'hui ?</div>
+        <div class="mood-selector" id="moodSelector">
+          <button class="mood-btn" data-mood="1">😔</button>
+          <button class="mood-btn" data-mood="2">😕</button>
+          <button class="mood-btn" data-mood="3">😐</button>
+          <button class="mood-btn" data-mood="4">🙂</button>
+          <button class="mood-btn" data-mood="5">😄</button>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">Niveau d'énergie</div>
+        <input type="range" min="1" max="10" value="5" class="energy-slider" id="energySlider">
+        <div style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #A78BFA;">
+          <span id="energyValue">5</span> / 10
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">Notes du jour</div>
+        <textarea class="journal-textarea" id="journalText" placeholder="Qu'as-tu appris aujourd'hui ? Quels obstacles ? Quelles victoires ?"></textarea>
+        <button class="save-btn" onclick="App.saveJournal()">💾 Enregistrer la journée</button>
+      </div>
+      <div class="section">
+        <div class="section-title">Objectifs de la semaine</div>
+        <textarea class="journal-textarea" id="weekGoals" placeholder="Quels sont tes 3 objectifs prioritaires cette semaine ?"></textarea>
+        <button class="save-btn" onclick="App.saveWeekGoals()">🎯 Enregistrer les objectifs</button>
+      </div>
+    </div>
+
+    <!-- ═══ TRACKER (RÉSEAU + GPA) ═══ -->
+    <div class="view" id="view-tracker">
+      <div class="section">
+        <div class="section-title">🎓 GPA prévisionnel (AY)</div>
+        <div class="gpa-display">
+          <div class="gpa-value" id="gpaDisplay">—</div>
+          <div class="gpa-label">GPA cumulé</div>
+          <div class="gpa-target">Cible : 5.0+ pour IB Londres</div>
+        </div>
+        <div id="coursesList"></div>
+        <button class="network-add" onclick="App.addCourse()">+ Ajouter un cours</button>
+      </div>
+
+      <div class="section">
+        <div class="section-title">🤝 Tracker réseau</div>
+        <button class="network-add" onclick="App.addContact()">+ Ajouter un contact</button>
+        <div id="contactsList"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══ TABS ═══ -->
+  <nav class="tabs">
+    <div class="tab active" data-view="dashboard">
+      <div class="tab-icon">🏠</div>
+      <div class="tab-label">Dashboard</div>
+    </div>
+    <div class="tab" data-view="tasks">
+      <div class="tab-icon">📋</div>
+      <div class="tab-label">Tâches</div>
+    </div>
+    <div class="tab" data-view="journal">
+      <div class="tab-icon">📔</div>
+      <div class="tab-label">Journal</div>
+    </div>
+    <div class="tab" data-view="tracker">
+      <div class="tab-icon">📊</div>
+      <div class="tab-label">Tracker</div>
+    </div>
+  </nav>
+
+  <!-- ═══ MODAL ═══ -->
+  <div class="modal-bg" id="modalBg">
+    <div class="modal" id="modalContent"></div>
+  </div>
+
+  <!-- DATA -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

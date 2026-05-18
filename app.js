@@ -1,3 +1,5 @@
+const SUPABASE_URL = 'https://lfaevjqycpeosqnivbbg.supabase.co/rest/v1/';
+const SUPABASE_KEY = 'sb_publishable_YDjzY_1yMeJsUQTEid3-8w_b7UOgNnO';
 // ═══════════════════════════════════════════════════════════════
 // JPM TRACKER — App Logic
 // ═══════════════════════════════════════════════════════════════
